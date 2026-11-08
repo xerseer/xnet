@@ -4,113 +4,111 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="description" content="Documentation for xnet, a typed networking module for Roblox.">
-<title>xnet</title>
+<title>xnet (sharp)</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@500;700&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
 <style>
-/* Layout: fixed left rail of sections, one reading column; code blocks are the main surface. */
+/* Layout: plain left index, one reading column. Ink on stone, one olive accent, rules instead of boxes. */
 :root {
-  --bg: #f6f7f9;
+  --bg: #fbfbfa;
   --surface: #ffffff;
-  --code-bg: #eef1f5;
-  --fg: #1a1f29;
-  --muted: #5a6475;
-  --line: #dde2ea;
-  --accent: #0b7a6f;
-  --accent-soft: #dff2ef;
-  --tag-server: #9a4b00;
-  --tag-server-bg: #fbecd9;
-  --tag-client: #2a55b8;
-  --tag-client-bg: #e3ebfb;
-  --tk-kw: #8a2a8f;
-  --tk-str: #2f7a24;
-  --tk-num: #b2530c;
-  --tk-com: #808a99;
-  --tk-fn: #1f5fbf;
-  --font-display: "Familjen Grotesk", "Segoe UI", system-ui, sans-serif;
-  --font-body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --code-bg: #f3f3f0;
+  --fg: #1d1d1b;
+  --muted: #6b6a64;
+  --line: #ecebe7;
+  --line-strong: #dedcd6;
+  --accent: #4f5d2a;
+  --accent-soft: #eef0e4;
+  --server: #8a4b1f;
+  --client: #355a7a;
+  --tk-kw: #1d1d1b;
+  --tk-str: #4f5d2a;
+  --tk-num: #8a4b1f;
+  --tk-com: #94928a;
+  --tk-fn: #355a7a;
+  --radius: 0;
+  --font-body: "Schibsted Grotesk", "Segoe UI", system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, Consolas, monospace;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg: #12161d; --surface: #181d26; --code-bg: #0e1218; --fg: #e4e8ef; --muted: #98a2b3; --line: #2a313d;
-    --accent: #43c4b3; --accent-soft: #163631;
-    --tag-server: #f3b26b; --tag-server-bg: #3a2814; --tag-client: #8fb2ff; --tag-client-bg: #1b2a4a;
-    --tk-kw: #d79be0; --tk-str: #9fd38a; --tk-num: #f0a868; --tk-com: #6b7587; --tk-fn: #82b4ff;
+    --bg: #161615; --surface: #1c1c1a; --code-bg: #1f1f1d; --fg: #e8e7e2; --muted: #9c9a92;
+    --line: #242422; --line-strong: #2f2f2c; --accent: #b3bf7d; --accent-soft: #2a2e1f;
+    --server: #d9a27a; --client: #93b4d1;
+    --tk-kw: #e8e7e2; --tk-str: #b3bf7d; --tk-num: #d9a27a; --tk-com: #75736c; --tk-fn: #93b4d1;
     color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
-  --bg: #12161d; --surface: #181d26; --code-bg: #0e1218; --fg: #e4e8ef; --muted: #98a2b3; --line: #2a313d;
-  --accent: #43c4b3; --accent-soft: #163631;
-  --tag-server: #f3b26b; --tag-server-bg: #3a2814; --tag-client: #8fb2ff; --tag-client-bg: #1b2a4a;
-  --tk-kw: #d79be0; --tk-str: #9fd38a; --tk-num: #f0a868; --tk-com: #6b7587; --tk-fn: #82b4ff;
+  --bg: #161615; --surface: #1c1c1a; --code-bg: #1f1f1d; --fg: #e8e7e2; --muted: #9c9a92;
+  --line: #242422; --line-strong: #2f2f2c; --accent: #b3bf7d; --accent-soft: #2a2e1f;
+  --server: #d9a27a; --client: #93b4d1;
+  --tk-kw: #e8e7e2; --tk-str: #b3bf7d; --tk-num: #d9a27a; --tk-com: #75736c; --tk-fn: #93b4d1;
   color-scheme: dark;
 }
 
 * { box-sizing: border-box; }
 body { background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: 15px; line-height: 1.6; }
-a { color: var(--accent); }
+a { color: var(--accent); text-underline-offset: 3px; }
 a:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
-.shell { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 48px; max-width: 1120px; margin: 0 auto;
-  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 40px 80px; }
+.shell { display: grid; grid-template-columns: 180px minmax(0, 1fr); gap: 64px; max-width: 1080px; margin: 0 auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 48px 96px; }
 
-nav.rail { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 32px); align-self: start; display: flex; flex-direction: column; gap: 2px; font-size: 14px; }
-nav.rail .brand { font-family: var(--font-display); font-weight: 700; font-size: 26px; letter-spacing: -0.02em; margin-bottom: 4px; color: var(--fg); text-decoration: none; }
-nav.rail .ver { font-family: var(--font-mono); font-size: 12px; color: var(--muted); margin-bottom: 18px; }
-nav.rail a.get { font-size: 13px; font-weight: 600; text-decoration: none; margin: -8px 0 16px; }
-.btn { display: inline-block; font-weight: 600; color: var(--surface); background: var(--accent); text-decoration: none; padding: 8px 16px; border-radius: 8px; }
-.btn:hover { filter: brightness(1.08); }
-.hint { font-size: 13px; color: var(--muted); }
-nav.rail a.item { color: var(--muted); text-decoration: none; padding: 4px 10px; border-left: 2px solid var(--line); }
-nav.rail a.item:hover { color: var(--fg); border-left-color: var(--muted); }
-nav.rail a.item.on { color: var(--accent); border-left-color: var(--accent); font-weight: 500; }
+nav.rail { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 40px); align-self: start; display: flex; flex-direction: column; gap: 2px; font-size: 14px; }
+nav.rail .brand { font-weight: 700; font-size: 20px; letter-spacing: -0.02em; color: var(--fg); text-decoration: none; }
+nav.rail .ver { font-family: var(--font-mono); font-size: 11.5px; color: var(--muted); margin-bottom: 6px; }
+nav.rail a.get { font-size: 13px; font-weight: 500; margin-bottom: 20px; }
+nav.rail a.item { color: var(--muted); text-decoration: none; padding: 3px 0; }
+nav.rail a.item:hover { color: var(--fg); }
+nav.rail a.item.on { color: var(--fg); font-weight: 600; }
 
-main { min-width: 0; display: flex; flex-direction: column; gap: 56px; }
-section { display: flex; flex-direction: column; gap: 14px; scroll-margin-top: 24px; }
-h1, h2, h3 { font-family: var(--font-display); text-wrap: balance; margin: 0; letter-spacing: -0.015em; }
-h1 { font-size: clamp(34px, 6vw, 48px); line-height: 1.05; }
-h2 { font-size: 26px; padding-bottom: 8px; border-bottom: 1px solid var(--line); }
-h3 { font-size: 17px; margin-top: 8px; }
-p { margin: 0; max-width: 68ch; }
+main { min-width: 0; display: flex; flex-direction: column; gap: 64px; }
+section { display: flex; flex-direction: column; gap: 14px; scroll-margin-top: 32px; }
+h1, h2, h3 { text-wrap: balance; margin: 0; letter-spacing: -0.02em; font-weight: 700; }
+h1 { font-size: clamp(36px, 6vw, 52px); line-height: 1; }
+h2 { font-size: 22px; }
+h3 { font-size: 15px; margin-top: 10px; }
+p { margin: 0; max-width: 66ch; }
+ul { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 4px; max-width: 70ch; }
 .lede { font-size: 17px; color: var(--muted); }
-.lede code { color: var(--fg); }
+.hint { font-size: 13px; color: var(--muted); }
 
-code { font-family: var(--font-mono); font-size: 0.86em; background: var(--code-bg); padding: 1px 5px; border-radius: 4px; }
-.code { position: relative; background: var(--code-bg); border: 1px solid var(--line); border-radius: 8px; }
-.code .label { font-family: var(--font-mono); font-size: 11.5px; color: var(--muted); padding: 8px 14px 0; display: flex; align-items: center; gap: 8px; }
-.code pre { margin: 0; padding: 10px 14px 14px; overflow-x: auto; font-family: var(--font-mono); font-size: 13px; line-height: 1.6; tab-size: 4; }
+.btn { display: inline-block; font-weight: 600; font-size: 14px; color: var(--accent); background: var(--accent-soft); text-decoration: none; padding: 9px 16px; border-radius: var(--radius); }
+.btn:hover { background: var(--line); }
+
+code { font-family: var(--font-mono); font-size: 0.85em; background: var(--code-bg); padding: 1px 5px; border-radius: var(--radius); }
+.code { position: relative; background: var(--code-bg); border-radius: var(--radius); }
+.code .label { font-family: var(--font-mono); font-size: 11px; color: var(--muted); padding: 10px 16px 0; text-transform: lowercase; }
+.code pre { margin: 0; padding: 8px 16px 16px; overflow-x: auto; font-family: var(--font-mono); font-size: 13px; line-height: 1.65; tab-size: 4; }
 .code pre code { background: none; padding: 0; font-size: inherit; }
-.copy { position: absolute; top: 6px; right: 6px; font: 500 12px var(--font-body); color: var(--muted); background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 3px 9px; cursor: pointer; }
+.copy { position: absolute; top: 6px; right: 8px; font: 500 12px var(--font-body); color: var(--muted); background: none; border: 0; padding: 4px 6px; cursor: pointer; }
 .copy:hover { color: var(--fg); }
-.tk-kw { color: var(--tk-kw); } .tk-str { color: var(--tk-str); } .tk-num { color: var(--tk-num); }
-.tk-com { color: var(--tk-com); font-style: italic; } .tk-fn { color: var(--tk-fn); }
+.tk-kw { color: var(--tk-kw); font-weight: 600; } .tk-str { color: var(--tk-str); } .tk-num { color: var(--tk-num); }
+.tk-com { color: var(--tk-com); } .tk-fn { color: var(--tk-fn); }
 
 .pair { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
 
-.tbl { overflow-x: auto; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); }
+.tbl { overflow-x: auto; }
 table { border-collapse: collapse; width: 100%; font-size: 14px; }
-th, td { text-align: left; padding: 9px 14px; border-bottom: 1px solid var(--line); vertical-align: top; }
-tr:last-child td { border-bottom: 0; }
-th { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); background: var(--bg); }
+th, td { text-align: left; padding: 9px 16px 9px 0; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font-size: 12px; font-weight: 600; color: var(--muted); border-bottom-color: var(--line-strong); }
 td code { white-space: nowrap; }
 td.sig code { white-space: normal; }
 
-.tag { display: inline-block; font: 600 11px var(--font-mono); padding: 1px 7px; border-radius: 99px; letter-spacing: 0.02em; white-space: nowrap; }
-.tag.server { color: var(--tag-server); background: var(--tag-server-bg); }
-.tag.client { color: var(--tag-client); background: var(--tag-client-bg); }
-.tag.local { color: var(--accent); background: var(--accent-soft); }
+.tag { font: 600 11px var(--font-mono); text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap; }
+.tag.server { color: var(--server); }
+.tag.client { color: var(--client); }
+.tag.local { color: var(--muted); }
 
-.note { border-left: 3px solid var(--accent); background: var(--surface); padding: 10px 14px; border-radius: 0 8px 8px 0; font-size: 14px; max-width: 72ch; }
+.note { background: var(--accent-soft); padding: 12px 16px; border-radius: var(--radius); font-size: 14px; max-width: 72ch; }
 .note p { max-width: none; }
 
 @media (max-width: 820px) {
-  .shell { grid-template-columns: minmax(0, 1fr); gap: 28px; padding-block: 24px 64px; }
-  nav.rail { position: static; flex-direction: row; flex-wrap: wrap; gap: 6px; }
-  nav.rail .brand, nav.rail .ver, nav.rail a.get { width: 100%; margin: 0; }
-  nav.rail a.item { border: 1px solid var(--line); border-radius: 99px; padding: 2px 10px; }
-  nav.rail a.item.on { border-color: var(--accent); }
+  .shell { grid-template-columns: minmax(0, 1fr); gap: 32px; padding-block: 28px 64px; }
+  nav.rail { position: static; flex-direction: row; flex-wrap: wrap; column-gap: 16px; row-gap: 2px; }
+  nav.rail .brand, nav.rail .ver, nav.rail a.get { width: 100%; }
+  nav.rail a.get { margin-bottom: 8px; }
   .pair { grid-template-columns: minmax(0, 1fr); }
 }
 @media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
@@ -122,7 +120,6 @@ td.sig code { white-space: normal; }
 <div class="shell">
   <nav class="rail" aria-label="Sections">
     <a class="brand" href="#top">xnet</a>
-    <div class="ver">ReplicatedStorage.xnet</div>
     <a class="get" href="https://create.roblox.com/store/asset/70549339899196/xnet" target="_blank" rel="noopener">Get xnet ↗</a>
     <a class="item" href="#start">Quick start</a>
     <a class="item" href="#receivers">Receivers</a>
@@ -138,14 +135,12 @@ td.sig code { white-space: normal; }
   <main>
     <section id="top">
       <h1>xnet</h1>
-      <p class="lede">Typed channels for Roblox. Define each channel once with a schema, and xnet makes the remotes, checks every incoming value, and types both ends. Requires the new Luau type solver.</p>
-      <p><a class="btn" href="https://create.roblox.com/store/asset/70549339899196/xnet" target="_blank" rel="noopener">Get xnet on the Creator Store ↗</a></p>
-      <p class="hint">Insert it from the Toolbox, then move it to <code>ReplicatedStorage</code>.</p>
+      <p class="lede">A fully typed and validated remote networking wrapper module for Roblox to make your life easier, and your code cleaner.</p>
+      <p><a class="btn" href="https://create.roblox.com/store/asset/70549339899196/xnet" target="_blank" rel="noopener">Creator Store ↗</a></p>
     </section>
 
     <section id="start">
       <h2>Quick start</h2>
-      <p>Put your channels in one shared module. The server and every client must require the same <code>Namespace</code>.</p>
 <div class="code" data-label="ReplicatedStorage.Net"><pre><code>local xnet = require(game.ReplicatedStorage.xnet)
 
 return xnet:Namespace({
@@ -208,7 +203,7 @@ local amount = Net.GetCoins:SendToServer() -- number</code></pre></div>
           <tr><td><code>:DisconnectAll()</code></td><td>either</td><td>Removes every handler on the channel.</td></tr>
         </tbody>
       </table></div>
-      <p>Every <code>Connect…</code> returns a connection:</p>
+      <p>Every <code>:Connect()</code> returns a connection:</p>
 <div class="code" data-label="Disconnect"><pre><code>local connection = Net.Toast:Connect(function(text)
 	print(text)
 end)
