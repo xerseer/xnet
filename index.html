@@ -1,0 +1,444 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Documentation for xnet, a typed networking module for Roblox.">
+<title>xnet</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@500;700&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: fixed left rail of sections, one reading column; code blocks are the main surface. */
+:root {
+  --bg: #f6f7f9;
+  --surface: #ffffff;
+  --code-bg: #eef1f5;
+  --fg: #1a1f29;
+  --muted: #5a6475;
+  --line: #dde2ea;
+  --accent: #0b7a6f;
+  --accent-soft: #dff2ef;
+  --tag-server: #9a4b00;
+  --tag-server-bg: #fbecd9;
+  --tag-client: #2a55b8;
+  --tag-client-bg: #e3ebfb;
+  --tk-kw: #8a2a8f;
+  --tk-str: #2f7a24;
+  --tk-num: #b2530c;
+  --tk-com: #808a99;
+  --tk-fn: #1f5fbf;
+  --font-display: "Familjen Grotesk", "Segoe UI", system-ui, sans-serif;
+  --font-body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #12161d; --surface: #181d26; --code-bg: #0e1218; --fg: #e4e8ef; --muted: #98a2b3; --line: #2a313d;
+    --accent: #43c4b3; --accent-soft: #163631;
+    --tag-server: #f3b26b; --tag-server-bg: #3a2814; --tag-client: #8fb2ff; --tag-client-bg: #1b2a4a;
+    --tk-kw: #d79be0; --tk-str: #9fd38a; --tk-num: #f0a868; --tk-com: #6b7587; --tk-fn: #82b4ff;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #12161d; --surface: #181d26; --code-bg: #0e1218; --fg: #e4e8ef; --muted: #98a2b3; --line: #2a313d;
+  --accent: #43c4b3; --accent-soft: #163631;
+  --tag-server: #f3b26b; --tag-server-bg: #3a2814; --tag-client: #8fb2ff; --tag-client-bg: #1b2a4a;
+  --tk-kw: #d79be0; --tk-str: #9fd38a; --tk-num: #f0a868; --tk-com: #6b7587; --tk-fn: #82b4ff;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: 15px; line-height: 1.6; }
+a { color: var(--accent); }
+a:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.shell { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 48px; max-width: 1120px; margin: 0 auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 40px 80px; }
+
+nav.rail { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 32px); align-self: start; display: flex; flex-direction: column; gap: 2px; font-size: 14px; }
+nav.rail .brand { font-family: var(--font-display); font-weight: 700; font-size: 26px; letter-spacing: -0.02em; margin-bottom: 4px; color: var(--fg); text-decoration: none; }
+nav.rail .ver { font-family: var(--font-mono); font-size: 12px; color: var(--muted); margin-bottom: 18px; }
+nav.rail a.get { font-size: 13px; font-weight: 600; text-decoration: none; margin: -8px 0 16px; }
+.btn { display: inline-block; font-weight: 600; color: var(--surface); background: var(--accent); text-decoration: none; padding: 8px 16px; border-radius: 8px; }
+.btn:hover { filter: brightness(1.08); }
+.hint { font-size: 13px; color: var(--muted); }
+nav.rail a.item { color: var(--muted); text-decoration: none; padding: 4px 10px; border-left: 2px solid var(--line); }
+nav.rail a.item:hover { color: var(--fg); border-left-color: var(--muted); }
+nav.rail a.item.on { color: var(--accent); border-left-color: var(--accent); font-weight: 500; }
+
+main { min-width: 0; display: flex; flex-direction: column; gap: 56px; }
+section { display: flex; flex-direction: column; gap: 14px; scroll-margin-top: 24px; }
+h1, h2, h3 { font-family: var(--font-display); text-wrap: balance; margin: 0; letter-spacing: -0.015em; }
+h1 { font-size: clamp(34px, 6vw, 48px); line-height: 1.05; }
+h2 { font-size: 26px; padding-bottom: 8px; border-bottom: 1px solid var(--line); }
+h3 { font-size: 17px; margin-top: 8px; }
+p { margin: 0; max-width: 68ch; }
+.lede { font-size: 17px; color: var(--muted); }
+.lede code { color: var(--fg); }
+
+code { font-family: var(--font-mono); font-size: 0.86em; background: var(--code-bg); padding: 1px 5px; border-radius: 4px; }
+.code { position: relative; background: var(--code-bg); border: 1px solid var(--line); border-radius: 8px; }
+.code .label { font-family: var(--font-mono); font-size: 11.5px; color: var(--muted); padding: 8px 14px 0; display: flex; align-items: center; gap: 8px; }
+.code pre { margin: 0; padding: 10px 14px 14px; overflow-x: auto; font-family: var(--font-mono); font-size: 13px; line-height: 1.6; tab-size: 4; }
+.code pre code { background: none; padding: 0; font-size: inherit; }
+.copy { position: absolute; top: 6px; right: 6px; font: 500 12px var(--font-body); color: var(--muted); background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 3px 9px; cursor: pointer; }
+.copy:hover { color: var(--fg); }
+.tk-kw { color: var(--tk-kw); } .tk-str { color: var(--tk-str); } .tk-num { color: var(--tk-num); }
+.tk-com { color: var(--tk-com); font-style: italic; } .tk-fn { color: var(--tk-fn); }
+
+.pair { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+
+.tbl { overflow-x: auto; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); }
+table { border-collapse: collapse; width: 100%; font-size: 14px; }
+th, td { text-align: left; padding: 9px 14px; border-bottom: 1px solid var(--line); vertical-align: top; }
+tr:last-child td { border-bottom: 0; }
+th { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); background: var(--bg); }
+td code { white-space: nowrap; }
+td.sig code { white-space: normal; }
+
+.tag { display: inline-block; font: 600 11px var(--font-mono); padding: 1px 7px; border-radius: 99px; letter-spacing: 0.02em; white-space: nowrap; }
+.tag.server { color: var(--tag-server); background: var(--tag-server-bg); }
+.tag.client { color: var(--tag-client); background: var(--tag-client-bg); }
+.tag.local { color: var(--accent); background: var(--accent-soft); }
+
+.note { border-left: 3px solid var(--accent); background: var(--surface); padding: 10px 14px; border-radius: 0 8px 8px 0; font-size: 14px; max-width: 72ch; }
+.note p { max-width: none; }
+
+@media (max-width: 820px) {
+  .shell { grid-template-columns: minmax(0, 1fr); gap: 28px; padding-block: 24px 64px; }
+  nav.rail { position: static; flex-direction: row; flex-wrap: wrap; gap: 6px; }
+  nav.rail .brand, nav.rail .ver, nav.rail a.get { width: 100%; margin: 0; }
+  nav.rail a.item { border: 1px solid var(--line); border-radius: 99px; padding: 2px 10px; }
+  nav.rail a.item.on { border-color: var(--accent); }
+  .pair { grid-template-columns: minmax(0, 1fr); }
+}
+@media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
+</style>
+<style>body { margin: 0; } img { max-width: 100%; } [hidden] { display: none !important; }</style>
+</head>
+<body>
+
+<div class="shell">
+  <nav class="rail" aria-label="Sections">
+    <a class="brand" href="#top">xnet</a>
+    <div class="ver">ReplicatedStorage.xnet</div>
+    <a class="get" href="https://create.roblox.com/store/asset/70549339899196/xnet" target="_blank" rel="noopener">Get xnet ↗</a>
+    <a class="item" href="#start">Quick start</a>
+    <a class="item" href="#receivers">Receivers</a>
+    <a class="item" href="#methods">Channel methods</a>
+    <a class="item" href="#requests">Requests</a>
+    <a class="item" href="#options">Channel options</a>
+    <a class="item" href="#configure">Configure</a>
+    <a class="item" href="#validation">Validation</a>
+    <a class="item" href="#schemas">Schemas</a>
+    <a class="item" href="#typing">Typing tips</a>
+  </nav>
+
+  <main>
+    <section id="top">
+      <h1>xnet</h1>
+      <p class="lede">Typed channels for Roblox. Define each channel once with a schema, and xnet makes the remotes, checks every incoming value, and types both ends. Requires the new Luau type solver.</p>
+      <p><a class="btn" href="https://create.roblox.com/store/asset/70549339899196/xnet" target="_blank" rel="noopener">Get xnet on the Creator Store ↗</a></p>
+      <p class="hint">Insert it from the Toolbox, then move it to <code>ReplicatedStorage</code>.</p>
+    </section>
+
+    <section id="start">
+      <h2>Quick start</h2>
+      <p>Put your channels in one shared module. The server and every client must require the same <code>Namespace</code>.</p>
+<div class="code" data-label="ReplicatedStorage.Net"><pre><code>local xnet = require(game.ReplicatedStorage.xnet)
+
+return xnet:Namespace({
+	Chat = xnet:Channel("Across", xnet.string({ maxLength = 200 })),
+	GetCoins = xnet:Channel("Across", xnet.nothing(), xnet.integer({ min = 0 })),
+	Hit = xnet:Channel("Across", xnet.struct({
+		target = xnet.character(),
+		damage = xnet.range(0, 100),
+	}), nil, { rateLimit = 10 }),
+	Toast = xnet:Channel("Same", xnet.string()),
+})</code></pre></div>
+      <div class="pair">
+<div class="code" data-label="Server"><pre><code>local Net = require(game.ReplicatedStorage.Net)
+
+Net.Chat:ConnectFromClient(function(player, text)
+	Net.Chat:SendToAllClients(`{player.Name}: {text}`)
+end)
+
+Net.GetCoins:ConnectFromClient(function(player)
+	return coins[player] or 0
+end)</code></pre></div>
+<div class="code" data-label="Client"><pre><code>local Net = require(game.ReplicatedStorage.Net)
+
+Net.Chat:ConnectFromServer(function(line)
+	print(line)
+end)
+
+Net.Chat:SendToServer("hello")
+local amount = Net.GetCoins:SendToServer() -- number</code></pre></div>
+      </div>
+    </section>
+
+    <section id="receivers">
+      <h2>Receivers</h2>
+      <p>The first argument to <code>xnet:Channel</code> says where messages go.</p>
+      <div class="tbl"><table>
+        <thead><tr><th>Receiver</th><th>Goes</th><th>Methods</th></tr></thead>
+        <tbody>
+          <tr><td><code>"Same"</code></td><td>Stays on this side. No remote is made.</td><td><code>Send</code>, <code>Connect</code></td></tr>
+          <tr><td><code>"Across"</code></td><td>Server ↔ client over a remote.</td><td><code>SendTo…</code>, <code>ConnectFrom…</code></td></tr>
+          <tr><td><code>"Both"</code></td><td>Either way.</td><td>All of them</td></tr>
+        </tbody>
+      </table></div>
+<div class="code" data-label="Signature"><pre><code>xnet:Channel(receiver, input?, output?, options?)</code></pre></div>
+      <p>Leave <code>output</code> out (or <code>nil</code>) for an event. Give it a schema to make a request that returns a value.</p>
+    </section>
+
+    <section id="methods">
+      <h2>Channel methods</h2>
+      <div class="tbl"><table>
+        <thead><tr><th>Method</th><th>Runs on</th><th>Does</th></tr></thead>
+        <tbody>
+          <tr><td><code>:Send(data)</code></td><td><span class="tag local">same side</span></td><td>Calls this side's <code>Connect</code> handlers.</td></tr>
+          <tr><td><code>:Connect(fn)</code></td><td><span class="tag local">same side</span></td><td>Listens for <code>Send</code>. <code>fn(data)</code></td></tr>
+          <tr><td><code>:SendToServer(data)</code></td><td><span class="tag client">client</span></td><td>Fires, or requests, the server.</td></tr>
+          <tr><td><code>:SendToClient(player, data)</code></td><td><span class="tag server">server</span></td><td>Fires, or requests, one player.</td></tr>
+          <tr><td><code>:SendToAllClients(data)</code></td><td><span class="tag server">server</span></td><td>Fires every player. As a request, returns <code>{ [Player]: result }</code>.</td></tr>
+          <tr><td><code>:ConnectFromClient(fn)</code></td><td><span class="tag server">server</span></td><td>Handles client messages. <code>fn(player, data)</code></td></tr>
+          <tr><td><code>:ConnectFromServer(fn)</code></td><td><span class="tag client">client</span></td><td>Handles server messages. <code>fn(data)</code></td></tr>
+          <tr><td><code>:DisconnectAll()</code></td><td>either</td><td>Removes every handler on the channel.</td></tr>
+        </tbody>
+      </table></div>
+      <p>Every <code>Connect…</code> returns a connection:</p>
+<div class="code" data-label="Disconnect"><pre><code>local connection = Net.Toast:Connect(function(text)
+	print(text)
+end)
+
+Net.Toast:Send("Saved")
+connection:Disconnect()</code></pre></div>
+    </section>
+
+    <section id="requests">
+      <h2>Requests</h2>
+      <p>A channel with an <code>output</code> schema is a request. <code>SendTo…</code> yields until the other side's handler returns, and the reply is checked against <code>output</code>.</p>
+<div class="code" data-label="Server asks a client"><pre><code>local Confirm = xnet:Channel("Across", xnet.string(), xnet.bool(), { timeout = 15 })
+
+-- client
+Net.Confirm:ConnectFromServer(function(question)
+	return showDialog(question)
+end)
+
+-- server
+local yes = Net.Confirm:SendToClient(player, "Trade 50 coins?")</code></pre></div>
+      <ul>
+        <li>A request channel takes one handler per side. A second <code>Connect…</code> errors.</li>
+        <li>A missing or failing handler replies <code>nil</code>, which is then checked like any other reply.</li>
+        <li>On a timeout or rejected reply, <code>onRequestFailed</code> decides what you get. See <a href="#configure">Configure</a>.</li>
+        <li>Requests can't be <code>unreliable</code>.</li>
+      </ul>
+    </section>
+
+    <section id="options">
+      <h2>Channel options</h2>
+      <div class="tbl"><table>
+        <thead><tr><th>Option</th><th>Type</th><th>Does</th></tr></thead>
+        <tbody>
+          <tr><td><code>unreliable</code></td><td><code>boolean</code></td><td>Uses an UnreliableRemoteEvent. Events only, not <code>Same</code>.</td></tr>
+          <tr><td><code>rateLimit</code></td><td><code>number</code></td><td>Messages per second per player, checked on the server. Extra ones are dropped.</td></tr>
+          <tr><td><code>strict</code></td><td><code>boolean</code></td><td>Overrides the global <code>strict</code> for this channel.</td></tr>
+          <tr><td><code>timeout</code></td><td><code>number</code></td><td>Request timeout in seconds for this channel.</td></tr>
+          <tr><td><code>middleware</code></td><td><code>(player?, value) -&gt; boolean</code></td><td>Runs after validation. Return <code>false</code> to drop the message.</td></tr>
+        </tbody>
+      </table></div>
+<div class="code" data-label="Example"><pre><code>Move = xnet:Channel("Across", xnet.vector3(), nil, {
+	unreliable = true,
+	rateLimit = 30,
+	middleware = function(player, position)
+		return player ~= nil and player.Character ~= nil
+	end,
+})</code></pre></div>
+    </section>
+
+    <section id="configure">
+      <h2>Configure</h2>
+      <p>Call <code>xnet:Configure</code> with the same settings on the server and the client, before <code>xnet:Namespace</code>.</p>
+<div class="code" data-label="ReplicatedStorage.Net"><pre><code>xnet:Configure({
+	timeout = 5,
+	onRequestFailed = "nil",
+	debug = game:GetService("RunService"):IsStudio(),
+	onRateLimited = function(player, channelName)
+		warn(player.Name, "is spamming", channelName)
+	end,
+})</code></pre></div>
+      <div class="tbl"><table>
+        <thead><tr><th>Setting</th><th>Default</th><th>Does</th></tr></thead>
+        <tbody>
+          <tr><td><code>timeout</code></td><td><code>10</code></td><td>Seconds a request waits.</td></tr>
+          <tr><td><code>onRequestFailed</code></td><td><code>"default"</code></td><td><code>"default"</code> returns the output schema's fallback, <code>"nil"</code> returns nil, <code>"error"</code> throws. The first two also warn.</td></tr>
+          <tr><td><code>strict</code></td><td><code>false</code></td><td>Drop invalid messages instead of cleaning them.</td></tr>
+          <tr><td><code>logRejections</code></td><td><code>true</code></td><td>Warn when incoming data is invalid.</td></tr>
+          <tr><td><code>catchHandlerErrors</code></td><td><code>true</code></td><td>Wrap handlers in <code>pcall</code> and warn on error.</td></tr>
+          <tr><td><code>debug</code></td><td><code>false</code></td><td>Print every message sent and received.</td></tr>
+          <tr><td><code>middleware</code></td><td><code>nil</code></td><td><code>(player?, channelName, value) -&gt; boolean</code> for every channel.</td></tr>
+          <tr><td><code>onRateLimited</code></td><td><code>nil</code></td><td><code>(player, channelName)</code> when a message hits <code>rateLimit</code>.</td></tr>
+          <tr><td><code>obfuscate</code> *</td><td><code>true</code></td><td>Give remotes random names, salted per server.</td></tr>
+          <tr><td><code>remoteWaitTimeout</code> *</td><td><code>10</code></td><td>Seconds the client waits for remotes to appear.</td></tr>
+        </tbody>
+      </table></div>
+      <p>* These can't change after the first <code>xnet:Namespace</code>. Unknown setting names error.</p>
+    </section>
+
+    <section id="validation">
+      <h2>Validation</h2>
+      <p>Every value that crosses the network is parsed by its schema. Bad parts are replaced with the schema's fallback, and the whole list of problems is logged with paths.</p>
+<div class="code" data-label="Output"><pre><code>xnet: 'Hit' event from Player1 had invalid data (cleaned):
+  damage: 250 is above the maximum 100
+  bonus: unexpected field (dropped)</code></pre></div>
+      <div class="note"><p>With <code>strict = true</code>, an invalid message is dropped and no handler runs. Use it for anything a cheater could abuse.</p></div>
+      <p>Order on arrival: rate limit → schema → global <code>middleware</code> → channel <code>middleware</code> → handlers.</p>
+    </section>
+
+    <section id="schemas">
+      <h2>Schemas</h2>
+      <p>The fallback is what an invalid value becomes when it's cleaned.</p>
+
+      <h3>Values</h3>
+      <div class="tbl"><table>
+        <thead><tr><th>Schema</th><th>Type</th><th>Fallback / notes</th></tr></thead>
+        <tbody>
+          <tr><td class="sig"><code>bool()</code></td><td><code>boolean</code></td><td><code>false</code></td></tr>
+          <tr><td class="sig"><code>number({ min?, max?, integer? })</code></td><td><code>number</code></td><td>Rejects NaN and inf. Clamps to min/max.</td></tr>
+          <tr><td class="sig"><code>integer({ min?, max? })</code></td><td><code>number</code></td><td>Rounds non-integers.</td></tr>
+          <tr><td class="sig"><code>range(min, max)</code></td><td><code>number</code></td><td>Clamps into range.</td></tr>
+          <tr><td class="sig"><code>string({ maxLength? })</code></td><td><code>string</code></td><td><code>""</code>. Truncates to <code>maxLength</code> bytes.</td></tr>
+          <tr><td class="sig"><code>buffer({ maxSize? })</code></td><td><code>buffer</code></td><td>Empty buffer.</td></tr>
+          <tr><td class="sig"><code>vector3()</code> <code>vector2()</code> <code>cframe()</code> <code>color3()</code></td><td>same</td><td>Zero / identity / black. Must be finite.</td></tr>
+          <tr><td class="sig"><code>numberRange()</code> <code>numberSequence()</code> <code>ray()</code> <code>dateTime()</code></td><td>same</td><td>Must be finite where it applies.</td></tr>
+          <tr><td class="sig"><code>player()</code></td><td><code>Player?</code></td><td>A Player still in the game.</td></tr>
+          <tr><td class="sig"><code>character()</code></td><td><code>Model?</code></td><td>A Model that belongs to a player.</td></tr>
+          <tr><td class="sig"><code>instance(className?)</code></td><td><code>T?</code></td><td>Checks <code>IsA(className)</code>.</td></tr>
+          <tr><td class="sig"><code>any()</code></td><td><code>any</code></td><td>No checks.</td></tr>
+          <tr><td class="sig"><code>nothing()</code></td><td><code>nil</code></td><td>For channels that send no data.</td></tr>
+        </tbody>
+      </table></div>
+
+      <h3>Choices</h3>
+      <div class="tbl"><table>
+        <thead><tr><th>Schema</th><th>Type</th><th>Fallback / notes</th></tr></thead>
+        <tbody>
+          <tr><td class="sig"><code>literal(value)</code></td><td><code>T</code></td><td>Only <code>value</code>.</td></tr>
+          <tr><td class="sig"><code>enum({ a = true, b = true })</code></td><td><code>"a" | "b"</code></td><td>First value, sorted. The list form <code>{"a","b"}</code> also works but types as <code>string</code>.</td></tr>
+          <tr><td class="sig"><code>robloxEnum(Enum.Material)</code></td><td><code>Enum.Material</code></td><td>First item of the enum.</td></tr>
+          <tr><td class="sig"><code>union(a, b, ...)</code></td><td><code>A | B</code></td><td>First schema that matches cleanly, in order. Otherwise <code>a</code>'s fallback.</td></tr>
+        </tbody>
+      </table></div>
+
+      <h3>Collections</h3>
+      <div class="tbl"><table>
+        <thead><tr><th>Schema</th><th>Type</th><th>Fallback / notes</th></tr></thead>
+        <tbody>
+          <tr><td class="sig"><code>struct({ key = schema })</code></td><td><code>{ key: T }</code></td><td>Unknown fields are dropped.</td></tr>
+          <tr><td class="sig"><code>array(schema, { minLength?, maxLength? })</code></td><td><code>{ T }</code></td><td>Extra items are cut off.</td></tr>
+          <tr><td class="sig"><code>tuple(a, b, ...)</code></td><td><code>{ A | B }</code></td><td>Fixed positions.</td></tr>
+          <tr><td class="sig"><code>map(key, value, { maxEntries? })</code></td><td><code>{ [K]: V }</code></td><td>Invalid keys are dropped.</td></tr>
+          <tr><td class="sig"><code>set(schema, { maxEntries? })</code></td><td><code>{ [T]: true }</code></td><td>Entries that aren't <code>true</code> are dropped.</td></tr>
+        </tbody>
+      </table></div>
+
+      <h3>Modifiers</h3>
+      <div class="tbl"><table>
+        <thead><tr><th>Schema</th><th>Type</th><th>Does</th></tr></thead>
+        <tbody>
+          <tr><td class="sig"><code>optional(schema)</code></td><td><code>T?</code></td><td>Allows <code>nil</code>.</td></tr>
+          <tr><td class="sig"><code>default(schema, value)</code></td><td><code>T</code></td><td>Uses <code>value</code> when missing or invalid, without logging.</td></tr>
+          <tr><td class="sig"><code>refine(schema, check, message?)</code></td><td><code>T</code></td><td>Adds a custom check.</td></tr>
+          <tr><td class="sig"><code>transform(schema, fn)</code></td><td><code>T</code></td><td>Changes the value after parsing, then checks it again.</td></tr>
+        </tbody>
+      </table></div>
+
+<div class="code" data-label="Putting it together"><pre><code>local Item = xnet.struct({
+	id = xnet.string({ maxLength = 32 }),
+	rarity = xnet.enum({ common = true, rare = true, epic = true }),
+	count = xnet.default(xnet.integer({ min = 1, max = 99 }), 1),
+	tags = xnet.optional(xnet.set(xnet.string(), { maxEntries = 8 })),
+	name = xnet.transform(xnet.string({ maxLength = 20 }), function(text: string)
+		return string.lower(text)
+	end),
+	price = xnet.refine(xnet.number(), function(n) return n &gt;= 0 end, "price can't be negative"),
+})
+
+Equip = xnet:Channel("Across", Item)</code></pre></div>
+    </section>
+
+    <section id="typing">
+      <h2>Typing tips</h2>
+      <ul>
+        <li><code>literal("idle")</code> widens to <code>string</code>. Annotate it to keep the exact value: <code>local idle: Types.Schema&lt;"idle"&gt; = xnet.literal("idle")</code>.</li>
+        <li>Use the keys form <code>enum({ idle = true, run = true })</code> to get <code>"idle" | "run"</code>.</li>
+        <li>Annotate the parameter in <code>transform</code> callbacks, like <code>function(text: string)</code>. <code>refine</code> usually works without it.</li>
+        <li>Get a schema's value type with <code>Types.ValueOf&lt;typeof(schema)&gt;</code>.</li>
+      </ul>
+    </section>
+  </main>
+</div>
+
+<script>
+(function () {
+  const KW = new Set("local const function end return if then else elseif for in do while repeat until not and or nil true false break continue typeof".split(" "));
+  const RE = /(--[^\n]*)|("(?:[^"\\\n]|\\.)*"|`(?:[^`\\]|\\.)*`)|(\b\d+(?:\.\d+)?\b)|([A-Za-z_]\w*)(?=\s*\()|([A-Za-z_]\w*)/g;
+  const esc = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+  function highlight(src) {
+    let out = "", last = 0, m;
+    RE.lastIndex = 0;
+    while ((m = RE.exec(src))) {
+      out += esc(src.slice(last, m.index));
+      const t = esc(m[0]);
+      if (m[1]) out += `<span class="tk-com">${t}</span>`;
+      else if (m[2]) out += `<span class="tk-str">${t}</span>`;
+      else if (m[3]) out += `<span class="tk-num">${t}</span>`;
+      else if (m[4]) out += KW.has(m[4]) ? `<span class="tk-kw">${t}</span>` : `<span class="tk-fn">${t}</span>`;
+      else out += KW.has(m[5]) ? `<span class="tk-kw">${t}</span>` : t;
+      last = RE.lastIndex;
+    }
+    return out + esc(src.slice(last));
+  }
+
+  document.querySelectorAll(".code").forEach((block) => {
+    const code = block.querySelector("code");
+    const raw = code.textContent;
+    code.innerHTML = highlight(raw);
+
+    if (block.dataset.label) {
+      const label = document.createElement("div");
+      label.className = "label";
+      label.textContent = block.dataset.label;
+      block.prepend(label);
+    }
+
+    const btn = document.createElement("button");
+    btn.className = "copy";
+    btn.type = "button";
+    btn.textContent = "Copy";
+    btn.addEventListener("click", () => {
+      const done = () => { btn.textContent = "Copied"; setTimeout(() => (btn.textContent = "Copy"), 1400); };
+      const select = () => { const r = document.createRange(); r.selectNodeContents(code); const s = getSelection(); s.removeAllRanges(); s.addRange(r); btn.textContent = "Press Ctrl+C"; };
+      try { navigator.clipboard.writeText(raw).then(done, select); } catch (e) { select(); }
+    });
+    block.append(btn);
+  });
+
+  const links = [...document.querySelectorAll("nav.rail a.item")];
+  const byId = new Map(links.map((a) => [a.getAttribute("href").slice(1), a]));
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach((e) => {
+      if (!e.isIntersecting) return;
+      links.forEach((a) => a.classList.remove("on"));
+      const a = byId.get(e.target.id);
+      if (a) a.classList.add("on");
+    });
+  }, { rootMargin: "-20% 0px -70% 0px" });
+  document.querySelectorAll("main section[id]").forEach((s) => io.observe(s));
+})();
+</script>
+</body>
+</html>
