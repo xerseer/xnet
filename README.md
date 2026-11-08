@@ -2,8 +2,12 @@
 
 A typed networking module for Roblox. Requires the new Luau type solver.
 
-- [Get it on the Creator Store](https://create.roblox.com/store/asset/70549339899196/xnet)
-- [Documentation](DOCS_URL)
+---
+
+### [Creator Store](https://create.roblox.com/store/asset/70549339899196/xnet)
+### [Documentation](https://xerseer.github.io/xnet/)
+
+---
 
 ## Install
 
